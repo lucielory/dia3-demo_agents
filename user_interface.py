@@ -1,4 +1,6 @@
-import streamlit as st 
+import base64
+
+import streamlit as st
 from llm_agent import ConversationAgent
 
 
@@ -20,19 +22,35 @@ class UserInterface:
 	def show_discussion_history(self):
 		for message in self.conversation_agent_object.get_conversation_history():
 			with st.chat_message(message["role"]):
-				st.markdown(message["content"])
+
+				if isinstance(message["content"], str):
+					st.markdown(message["content"])
+				else:
+					for part in message["content"]:
+						if part["type"] == "text":
+							st.markdown(part["text"])
+						elif part["type"] == "image_url":
+							image_base64 = part["image_url"]["url"].split(",", 1)[1]
+							st.image(base64.b64decode(image_base64), width=300)
 
 
 	def run(self):
-		text_interaction = st.chat_input(
+		user_interaction = st.chat_input(
 			"Que veux tu moussaillon ?",
-			accept_file=False,
+			accept_file=True,
+			file_type=["png", "jpg", "jpeg", "webp"],
 			accept_audio=False
 			)
 
-		if text_interaction :
-			self.conversation_agent_object.ask_llm(text_interaction)
-			self.show_discussion_history()
+		if user_interaction :
+
+			with st.spinner("Barbe-Quasar réfléchit..."):
+				self.conversation_agent_object.ask_llm(
+					user_interaction.text,
+					images=user_interaction.files
+				)
+
+		self.show_discussion_history()
 
 
 
@@ -79,11 +97,6 @@ if __name__ == "__main__":
 
 
 
-	# response = ask_llm(user_input)
-	# with st.chat_message("user"):
-	# 	st.markdown(user_input)
 
-	# with st.chat_message("system"):
-	# 	st.markdown(response)
 
 
