@@ -35,6 +35,15 @@ class ConversationAgent:
         )
 
 
+    def speech_to_text(self, audio_file):
+
+        transcription = self.groq_client.audio.transcriptions.create(
+            file=(audio_file.name or "audio.wav", audio_file.getvalue()),
+            model="whisper-large-v3-turbo"
+        )
+        return transcription.text
+
+
     def ask_llm(self, text_interaction):
 
         self.update_conversation_history(role="user", content=text_interaction)
@@ -47,6 +56,7 @@ class ConversationAgent:
 
 
         self.update_conversation_history(role="assistant", content=response)
+        return response
 
 
 
@@ -78,6 +88,7 @@ class ConversationAgent:
 
 if __name__ == "__main__":
     question = input("Pose ta question :\n")
-    response = ask_llm(question)
+    agent = ConversationAgent()
+    response = agent.ask_llm(question)
     print("\n")
     print(response)

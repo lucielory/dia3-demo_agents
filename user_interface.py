@@ -24,15 +24,25 @@ class UserInterface:
 
 
 	def run(self):
-		text_interaction = st.chat_input(
+		user_interaction = st.chat_input(
 			"Que veux tu moussaillon ?",
 			accept_file=False,
-			accept_audio=False
+			accept_audio=True
 			)
 
-		if text_interaction :
-			self.conversation_agent_object.ask_llm(text_interaction)
-			self.show_discussion_history()
+		if user_interaction :
+
+			if user_interaction.audio :
+				with st.spinner("Barbe-Quasar écoute ton message..."):
+					text_interaction = self.conversation_agent_object.speech_to_text(user_interaction.audio)
+			else :
+				text_interaction = user_interaction.text
+
+			if text_interaction :
+				with st.spinner("Barbe-Quasar réfléchit..."):
+					self.conversation_agent_object.ask_llm(text_interaction)
+
+		self.show_discussion_history()
 
 
 
@@ -79,11 +89,6 @@ if __name__ == "__main__":
 
 
 
-	# response = ask_llm(user_input)
-	# with st.chat_message("user"):
-	# 	st.markdown(user_input)
 
-	# with st.chat_message("system"):
-	# 	st.markdown(response)
 
 
